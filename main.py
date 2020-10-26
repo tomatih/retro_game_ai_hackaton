@@ -4,6 +4,8 @@ import random
 """
 sounds
 0 - destroy_asteroid
+1 - shoot_bullet
+2 - game_Over
 """
 
 
@@ -52,6 +54,7 @@ class Player():
 
     def hit(self):
         self.alive = False
+        pyxel.play(0, 2)
         global CURRENT_SCREEN
         CURRENT_SCREEN = "game_over"
 
