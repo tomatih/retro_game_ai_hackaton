@@ -21,6 +21,29 @@ def draw_text_centered(text, y, col=7):
     pyxel.text(pyxel.width/2 - len(text)*2, y, text, 7)
 
 
+class Background:
+    speed = -0.5
+
+    def __init__(self):
+        self.stars = list()
+        for i in range(50):
+            x = random.randrange(0, pyxel.width, 2)
+            y = random.randrange(0, pyxel.height, 2)
+            col = random.choice([7, 6, 15, 13])
+            self.stars.append([x, y, col])
+
+    def update(self):
+        for i in range(len(self.stars)):
+            self.stars[i][0] += self.speed
+            if self.stars[i][0] < 0:
+                self.stars[i][0] = pyxel.width
+                self.stars[i][1] = random.randrange(0, pyxel.height, 2)
+
+    def draw(self):
+        for (x, y, col) in self.stars:
+            pyxel.pset(x, y, col)
+
+
 class Player:
     moving_speed = 1.5
     size = 8
@@ -260,6 +283,7 @@ class App:
         global PLAYER
         PLAYER = Player()
         self.spawner = Spawner()
+        self.background = Background()
         # game start
         pyxel.run(self.update, self.draw)
 
@@ -286,8 +310,8 @@ class App:
             pyxel.quit()
 
     def update_main(self):
-        if not PLAYER.alive:
-            return
+        # update background
+        self.background.update()
         # enmy spawn logic
         self.spawner.update()
         # update objects
@@ -299,6 +323,8 @@ class App:
 
     def draw_main(self):
         pyxel.cls(0)
+        # background
+        self.background.draw()
         # Objects
         PLAYER.draw()
         for bullet in BULLETS:
@@ -315,16 +341,33 @@ class App:
 
     def draw_title(self):
         pyxel.cls(0)
+        self.background.draw()
         draw_text_centered("HELLO WORLD", pyxel.height*0.25)
         draw_text_centered("- PRESS ENTER -", pyxel.height*0.75)
 
     def update_game_over(self):
-        pass
+        if pyxel.btnp(pyxel.KEY_R):
+            global SCORE
+            SCORE = 0
+            global PLAYER
+            PLAYER = Player()
+            global ENEMIES
+            ENEMIES = []
+            global BULLETS
+            BULLETS = []
+            global CURRENT_SCREEN
+            CURRENT_SCREEN = 'main'
 
     def draw_game_over(self):
         pyxel.cls(0)
+        self.background.draw()
+        for bullet in BULLETS:
+            bullet.draw()
+        for enemy in ENEMIES:
+            enemy.draw()
         draw_text_centered("GAME OVER", pyxel.height*0.25)
-        draw_text_centered(f"SCORE: {SCORE}", pyxel.height*0.75)
+        draw_text_centered(f"SCORE: {SCORE}", pyxel.height*0.5)
+        draw_text_centered("- PRESS R TO RESTART -", pyxel.height*0.75)
 
 
 if __name__ == '__main__':
