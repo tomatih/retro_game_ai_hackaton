@@ -113,21 +113,6 @@ class Bullet():
         BULLETS.append(bl)
 
 
-class Spawner():
-    def update(self):
-        if pyxel.frame_count % (FPS*2) == 0:  # each wave
-
-            # passive enemies
-            amount = random.randint(1, 3)
-            for i in range(amount):
-                ENEMIES.append(Enemy_Basic.spawn_random())
-
-            # active enemies
-            amount = random.randrange(1, 2, step=8)
-            for i in range(amount):
-                ENEMIES.append(Enemy_Agressive.spawn_random())
-
-
 class Enemy_Basic():
     size = 8
     speed = -0.5
@@ -222,7 +207,7 @@ class Enemy_Moving():
 
     def draw(self):
         #pyxel.rect(self.x, self.y, self.size, self.size, 11)
-        pyxel.blt(self.x, self.y, 0, 8, 8, self.size, self.size, colkey=0)
+        pyxel.blt(self.x, self.y, 0, 8, 16, self.size, self.size, colkey=0)
 
     def hit(self):
         global SCORE
@@ -232,6 +217,34 @@ class Enemy_Moving():
     @classmethod
     def spawn_random(cls):
         return cls(random.randrange(pyxel.height-cls.size))
+
+
+class Spawner():
+
+    enemy_spawn_rates = {
+        Enemy_Basic:     [[0, 2], [1, 2], [1, 2], [2, 4]],
+        Enemy_Agressive: [[0, 0], [0, 1], [1, 2], [1, 2]],
+        Enemy_Moving:    [[0, 0], [0, 0], [0, 1], [0, 3]]
+    }
+
+    def update(self):
+        if pyxel.frame_count % (FPS*2) == 0:  # each wave
+            # difficulty scaling
+            if 0 <= SCORE <= 50:
+                phase = 0
+            elif 50 < SCORE <= 150:
+                phase = 1
+            elif 150 < SCORE <= 300:
+                phase = 2
+            else:
+                phase = 3
+
+            print(phase)
+            # enemy spawning
+            for enemt_type in self.enemy_spawn_rates:
+                amount = random.randint(*self.enemy_spawn_rates[enemt_type][phase])
+                for i in range(amount):
+                    ENEMIES.append(enemt_type.spawn_random())
 
 
 class App:
