@@ -26,7 +26,7 @@ class Background:
 
     def __init__(self):
         self.stars = list()
-        for i in range(50):
+        for i in range(110):
             x = random.randrange(0, pyxel.width, 2)
             y = random.randrange(0, pyxel.height, 2)
             col = random.choice([7, 6, 15, 13])
