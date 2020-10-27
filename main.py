@@ -139,6 +139,10 @@ class Enemy_Basic():
     def update(self):
         self.x += self.speed
 
+        if self.x < -self.size:
+            ENEMIES.remove(self)
+
+
     def draw(self):
         #pyxel.rect(self.x, self.y, self.size, self.size, 11)
         pyxel.blt(self.x, self.y, 0, 8, 0, self.size, self.size, colkey=0)
@@ -166,6 +170,10 @@ class Enemy_Agressive():
 
     def update(self):
         self.x += self.speed
+
+        if self.x < -self.size:
+            ENEMIES.remove(self)
+
         if pyxel.frame_count % (FPS*self.fire_rate) == self.offset:
             Bullet.shoot_enemy(self.x, self.y+self.size/2)
 
