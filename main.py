@@ -88,9 +88,10 @@ class Bullet():
 
                     pyxel.play(0, 0)
                     enemy.hit()
+                    # error happen if you hit two enemies at the same time
                     try:
                         BULLETS.remove(self)
-                    except:  # error happen if you hit two enemies at the same time
+                    except:
                         pass
         else:
             if PLAYER.x < self.x < PLAYER.x+PLAYER.size and\
@@ -142,7 +143,6 @@ class Enemy_Basic():
         if self.x < -self.size:
             ENEMIES.remove(self)
 
-
     def draw(self):
         #pyxel.rect(self.x, self.y, self.size, self.size, 11)
         pyxel.blt(self.x, self.y, 0, 8, 0, self.size, self.size, colkey=0)
@@ -170,6 +170,49 @@ class Enemy_Agressive():
 
     def update(self):
         self.x += self.speed
+
+        if self.x < -self.size:
+            ENEMIES.remove(self)
+
+        if pyxel.frame_count % (FPS*self.fire_rate) == self.offset:
+            Bullet.shoot_enemy(self.x, self.y+self.size/2)
+
+    def draw(self):
+        #pyxel.rect(self.x, self.y, self.size, self.size, 11)
+        pyxel.blt(self.x, self.y, 0, 8, 8, self.size, self.size, colkey=0)
+
+    def hit(self):
+        global SCORE
+        SCORE += self.point_value
+        ENEMIES.remove(self)
+
+    @classmethod
+    def spawn_random(cls):
+        return cls(random.randrange(pyxel.height-cls.size))
+
+
+class Enemy_Moving():
+    size = 8
+    speed = -0.5
+    point_value = 20
+    fire_rate = 3
+    move_chance = 50
+    move_rate = 2
+    move_distance = size
+
+    def __init__(self, y):
+        self.y = y
+        self.x = pyxel.width+self.size
+        self.offset = random.randint(1, FPS*self.fire_rate)
+
+    def update(self):
+        self.x += self.speed
+
+        if pyxel.frame_count % (FPS*self.move_rate) == self.offset:
+            roll = random.randint(0, 100)
+            if roll <= self.move_chance:
+                self.y += self.move_distance * \
+                    (1 if roll <= self.move_chance/2 else -1)
 
         if self.x < -self.size:
             ENEMIES.remove(self)
