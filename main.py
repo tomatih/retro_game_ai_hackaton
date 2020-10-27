@@ -237,7 +237,7 @@ class Enemy_Moving():
 class App:
     def __init__(self):
         # pyxel init
-        pyxel.init(256, 90, fps=FPS, caption="AI shooter")
+        pyxel.init(256, 120, fps=FPS, caption="AI shooter")
         pyxel.load("tmp.pyxres")
         # game init
         global PLAYER
