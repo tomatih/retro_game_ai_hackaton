@@ -160,7 +160,7 @@ class Enemy_Basic():
 class Enemy_Agressive():
     size = 8
     speed = -0.5
-    point_value = 20
+    point_value = 40
     fire_rate = 3
 
     def __init__(self, y):
