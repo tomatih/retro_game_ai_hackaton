@@ -112,6 +112,24 @@ class Bullet:
         bl = cls(x, y, True)
         BULLETS.append(bl)
 
+class Bullet_Diagonal(Bullet):
+
+
+    def __init__(self, x, y, agressive, up):
+        super().__init__(x, y, agressive)
+        self.speed_y = self.speed*(1 if up else -1)*0.5
+
+    def update(self):
+        self.y += self.speed_y
+        if self.y<-self.height or self.y > pyxel.height:
+            BULLETS.remove(self)
+        super().update()
+
+    @classmethod
+    def shoot_enemy(cls, x, y, up):
+        bl = cls(x, y, True, up)
+        BULLETS.append(bl)
+
 
 class Enemy:
     size = 8
@@ -186,13 +204,30 @@ class Enemy_Moving(Enemy):
         if pyxel.frame_count % (FPS*self.fire_rate) == self.offset:
             Bullet.shoot_enemy(self.x, self.y+self.size/2)
 
+class Enemy_Diagonal(Enemy):
+    point_value = 50
+    draw_y = 24
+
+    fire_rate = 3
+
+    def __init__(self, y):
+        super().__init__(y)
+        self.offset = random.randint(1, FPS*self.fire_rate)
+
+    def update(self):
+        super().update()
+        if pyxel.frame_count % (FPS*self.fire_rate) == self.offset:
+            Bullet_Diagonal.shoot_enemy(self.x, self.y+self.size/2,True)
+            Bullet_Diagonal.shoot_enemy(self.x, self.y+self.size/2,False)
+
 
 class Spawner:
 
     enemy_spawn_rates = {
         Enemy_Basic:     [[0, 2], [1, 2], [1, 2], [2, 4]],
         Enemy_Agressive: [[0, 0], [0, 1], [1, 2], [1, 2]],
-        Enemy_Moving:    [[0, 0], [0, 0], [0, 1], [0, 3]]
+        Enemy_Moving:    [[0, 0], [0, 0], [0, 1], [0, 3]],
+        Enemy_Diagonal:  [[0, 0], [0, 0], [0, 1], [1, 2]]
     }
 
     def update(self):
@@ -207,7 +242,6 @@ class Spawner:
             else:
                 phase = 3
 
-            print(phase)
             # enemy spawning
             for enemt_type in self.enemy_spawn_rates:
                 amount = random.randint(
