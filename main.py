@@ -112,8 +112,8 @@ class Bullet:
         bl = cls(x, y, True)
         BULLETS.append(bl)
 
-class Bullet_Diagonal(Bullet):
 
+class Bullet_Diagonal(Bullet):
 
     def __init__(self, x, y, agressive, up):
         super().__init__(x, y, agressive)
@@ -121,7 +121,7 @@ class Bullet_Diagonal(Bullet):
 
     def update(self):
         self.y += self.speed_y
-        if self.y<-self.height or self.y > pyxel.height:
+        if self.y < -self.height or self.y > pyxel.height:
             BULLETS.remove(self)
         super().update()
 
@@ -204,6 +204,7 @@ class Enemy_Moving(Enemy):
         if pyxel.frame_count % (FPS*self.fire_rate) == self.offset:
             Bullet.shoot_enemy(self.x, self.y+self.size/2)
 
+
 class Enemy_Diagonal(Enemy):
     point_value = 50
     draw_y = 24
@@ -217,8 +218,8 @@ class Enemy_Diagonal(Enemy):
     def update(self):
         super().update()
         if pyxel.frame_count % (FPS*self.fire_rate) == self.offset:
-            Bullet_Diagonal.shoot_enemy(self.x, self.y+self.size/2,True)
-            Bullet_Diagonal.shoot_enemy(self.x, self.y+self.size/2,False)
+            Bullet_Diagonal.shoot_enemy(self.x, self.y+self.size/2, True)
+            Bullet_Diagonal.shoot_enemy(self.x, self.y+self.size/2, False)
 
 
 class Spawner:
