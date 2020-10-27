@@ -23,4 +23,9 @@ To run the game with the AI
 IDK AI team hasn't told me yet
 ```
 
+### Playing the game
+You controll the player with the up and down arrows and shoot using the spacebar
+Your goal is to get as much points as you can
+You gain point by destroying the enemies
+The more powerfull the enemy the more points you get, but beware they start to fight back
 
