@@ -21,7 +21,7 @@ def draw_text_centered(text, y, col=7):
     pyxel.text(pyxel.width/2 - len(text)*2, y, text, 7)
 
 
-class Player():
+class Player:
     moving_speed = 1.5
     size = 8
 
@@ -59,7 +59,7 @@ class Player():
         CURRENT_SCREEN = "game_over"
 
 
-class Bullet():
+class Bullet:
     speed = 2
     height = 2
     width = 5
@@ -113,10 +113,9 @@ class Bullet():
         BULLETS.append(bl)
 
 
-class Enemy_Basic():
+class Enemy:
     size = 8
     speed = -0.5
-    point_value = 10
 
     def __init__(self, y):
         self.y = y
@@ -130,7 +129,8 @@ class Enemy_Basic():
 
     def draw(self):
         #pyxel.rect(self.x, self.y, self.size, self.size, 11)
-        pyxel.blt(self.x, self.y, 0, 8, 0, self.size, self.size, colkey=0)
+        pyxel.blt(self.x, self.y, 0, 8, self.draw_y,
+                  self.size, self.size, colkey=0)
 
     def hit(self):
         global SCORE
@@ -142,56 +142,40 @@ class Enemy_Basic():
         return cls(random.randrange(pyxel.height-cls.size))
 
 
-class Enemy_Agressive():
-    size = 8
-    speed = -0.5
+class Enemy_Basic(Enemy):
+    point_value = 10
+    draw_y = 0
+
+
+class Enemy_Agressive(Enemy):
     point_value = 40
+    draw_y = 8
     fire_rate = 3
 
     def __init__(self, y):
-        self.y = y
-        self.x = pyxel.width+self.size
+        super().__init__(y)
         self.offset = random.randint(1, FPS*self.fire_rate)
 
     def update(self):
-        self.x += self.speed
-
-        if self.x < -self.size:
-            ENEMIES.remove(self)
-
+        super().update()
         if pyxel.frame_count % (FPS*self.fire_rate) == self.offset:
             Bullet.shoot_enemy(self.x, self.y+self.size/2)
 
-    def draw(self):
-        #pyxel.rect(self.x, self.y, self.size, self.size, 11)
-        pyxel.blt(self.x, self.y, 0, 8, 8, self.size, self.size, colkey=0)
 
-    def hit(self):
-        global SCORE
-        SCORE += self.point_value
-        ENEMIES.remove(self)
-
-    @classmethod
-    def spawn_random(cls):
-        return cls(random.randrange(pyxel.height-cls.size))
-
-
-class Enemy_Moving():
-    size = 8
-    speed = -0.5
+class Enemy_Moving(Enemy):
     point_value = 20
+    draw_y = 16
     fire_rate = 3
     move_chance = 50
     move_rate = 2
-    move_distance = size
 
     def __init__(self, y):
-        self.y = y
-        self.x = pyxel.width+self.size
+        super().__init__(y)
+        self.move_distance = self.size
         self.offset = random.randint(1, FPS*self.fire_rate)
 
     def update(self):
-        self.x += self.speed
+        super().update()
 
         if pyxel.frame_count % (FPS*self.move_rate) == self.offset:
             roll = random.randint(0, 100)
@@ -199,27 +183,11 @@ class Enemy_Moving():
                 self.y += self.move_distance * \
                     (1 if roll <= self.move_chance/2 else -1)
 
-        if self.x < -self.size:
-            ENEMIES.remove(self)
-
         if pyxel.frame_count % (FPS*self.fire_rate) == self.offset:
             Bullet.shoot_enemy(self.x, self.y+self.size/2)
 
-    def draw(self):
-        #pyxel.rect(self.x, self.y, self.size, self.size, 11)
-        pyxel.blt(self.x, self.y, 0, 8, 16, self.size, self.size, colkey=0)
 
-    def hit(self):
-        global SCORE
-        SCORE += self.point_value
-        ENEMIES.remove(self)
-
-    @classmethod
-    def spawn_random(cls):
-        return cls(random.randrange(pyxel.height-cls.size))
-
-
-class Spawner():
+class Spawner:
 
     enemy_spawn_rates = {
         Enemy_Basic:     [[0, 2], [1, 2], [1, 2], [2, 4]],
@@ -242,7 +210,8 @@ class Spawner():
             print(phase)
             # enemy spawning
             for enemt_type in self.enemy_spawn_rates:
-                amount = random.randint(*self.enemy_spawn_rates[enemt_type][phase])
+                amount = random.randint(
+                    *self.enemy_spawn_rates[enemt_type][phase])
                 for i in range(amount):
                     ENEMIES.append(enemt_type.spawn_random())
 
