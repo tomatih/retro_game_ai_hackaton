@@ -16,6 +16,8 @@ SCORE = 0
 PLAYER = None
 FPS = 60
 CURRENT_SCREEN = "title"
+GAME_TITLE = "AI Space Shooter"
+AI_MODE_ENABLED = False
 ai = AI.Kalman(25)
 
 
@@ -103,16 +105,17 @@ class Bullet:
             self.speed *= -1
 
     def update(self):
-        search = False
-        if self.aggresive:
-            search = True
-        count = 0
-        if search:
-            for i in range(len(ai.bullets)):
-                count = i
-                if ai.bullets[i][0] == self.x and ai.bullets[i][1] == self.y:
-                    ai.bullets[i][0] += self.speed
-                    break
+        if AI_MODE_ENABLED:
+            search = False
+            if self.aggresive:
+                search = True
+            count = 0
+            if search:
+                for i in range(len(ai.bullets)):
+                    count = i
+                    if ai.bullets[i][0] == self.x and ai.bullets[i][1] == self.y:
+                        ai.bullets[i][0] += self.speed
+                        break
                 
                 
         # moving
@@ -121,8 +124,9 @@ class Bullet:
         # freeing memory
         if self.x > pyxel.width or self.x < -self.width:
             BULLETS.remove(self)
-            if search:
-                del ai.bullets[count]
+            if AI_MODE_ENABLED:
+                if search:
+                    del ai.bullets[count]
 
         # hitting logic
         if not self.aggresive:
@@ -142,8 +146,9 @@ class Bullet:
                     PLAYER.y-self.height < self.y < PLAYER.y+PLAYER.size:
                 PLAYER.hit()
                 BULLETS.remove(self)
-                if search:
-                    del ai.bullets[count]
+                if AI_MODE_ENABLED:
+                    if search:
+                        del ai.bullets[count]
 
     def draw(self):
         pyxel.rect(self.x, self.y, self.width, self.height, 3)
@@ -157,7 +162,8 @@ class Bullet:
     def shoot_enemy(cls, x, y):
         bl = cls(x, y, True)
         BULLETS.append(bl)
-        ai.bullets.append([bl.x,bl.y, 0])
+        if AI_MODE_ENABLED:
+            ai.bullets.append([bl.x,bl.y, 0])
 
 
 class Bullet_Diagonal(Bullet):
@@ -167,26 +173,30 @@ class Bullet_Diagonal(Bullet):
         self.speed_y = self.speed*(1 if up else -1)*0.5
 
     def update(self):
-        count = 0
-        for i in range(len(ai.bullets)):
-            if ai.bullets[i][0] == self.x and ai.bullets[i][1] == self.y:
-                ai.bullets[i][1] += self.speed_y
-                break
-            count = i
+        if AI_MODE_ENABLED:
+            count = 0
+            for i in range(len(ai.bullets)):
+                if ai.bullets[i][0] == self.x and ai.bullets[i][1] == self.y:
+                    ai.bullets[i][1] += self.speed_y
+                    break
+                count = i
+
         self.y += self.speed_y
         if self.y < -self.height or self.y > pyxel.height:
             BULLETS.remove(self)
-            del ai.bullets[count]
+            if AI_MODE_ENABLED:
+                del ai.bullets[count]
         super().update()
 
     @classmethod
     def shoot_enemy(cls, x, y, up):
         bl = cls(x, y, True, up)
         BULLETS.append(bl)
-        if bl.speed_y > 0:
-            ai.bullets.append([bl.x, bl.y, 1])
-        elif bl.speed_y < 0:
-            ai.bullets.append([bl.x, bl.y, -1])
+        if AI_MODE_ENABLED:
+            if bl.speed_y > 0:
+                ai.bullets.append([bl.x, bl.y, 1])
+            elif bl.speed_y < 0:
+                ai.bullets.append([bl.x, bl.y, -1])
 
 class Enemy:
     size = 8
@@ -197,18 +207,20 @@ class Enemy:
         self.x = pyxel.width+self.size
 
     def update(self):
-        count = 0
-        for i in range(len(ai.enemy_positions)):
-            count = i
-            if ai.enemy_positions[i][0] == self.x and ai.enemy_positions[i][1] == self.y:
-                ai.enemy_positions[i][0] += self.speed
-                break
+        if AI_MODE_ENABLED:
+            count = 0
+            for i in range(len(ai.enemy_positions)):
+                count = i
+                if ai.enemy_positions[i][0] == self.x and ai.enemy_positions[i][1] == self.y:
+                    ai.enemy_positions[i][0] += self.speed
+                    break
             
         self.x += self.speed
 
         if self.x < -self.size:
             ENEMIES.remove(self)
-            del ai.enemy_positions[count]
+            if AI_MODE_ENABLED:
+                del ai.enemy_positions[count]
     def draw(self):
         #pyxel.rect(self.x, self.y, self.size, self.size, 11)
         pyxel.blt(self.x, self.y, 0, 8, self.draw_y,
@@ -218,12 +230,13 @@ class Enemy:
         global SCORE
         SCORE += self.point_value
         ENEMIES.remove(self)
-        count = 0
-        for i in range(len(ai.enemy_positions)):
-            count = i
-            if ai.enemy_positions[i][0] == self.x and ai.enemy_positions[i][1] == self.y:
-                del ai.enemy_positions[count]
-                break
+        if AI_MODE_ENABLED:
+            count = 0
+            for i in range(len(ai.enemy_positions)):
+                count = i
+                if ai.enemy_positions[i][0] == self.x and ai.enemy_positions[i][1] == self.y:
+                    del ai.enemy_positions[count]
+                    break
         
 
     @classmethod
@@ -321,13 +334,14 @@ class Spawner:
                     *self.enemy_spawn_rates[enemt_type][phase])
                 for i in range(amount):
                     ENEMIES.append(enemt_type.spawn_random())
-                    ai.enemy_positions.append([ENEMIES[len(ENEMIES) - 1].x, ENEMIES[len(ENEMIES) - 1].y, ENEMIES[len(ENEMIES) - 1].point_value, ENEMIES[len(ENEMIES) - 1].size/2, 0])
+                    if AI_MODE_ENABLED:
+                        ai.enemy_positions.append([ENEMIES[len(ENEMIES) - 1].x, ENEMIES[len(ENEMIES) - 1].y, ENEMIES[len(ENEMIES) - 1].point_value, ENEMIES[len(ENEMIES) - 1].size/2, 0])
 
 
 class App:
     def __init__(self):
         # pyxel init
-        pyxel.init(256, 120, fps=FPS, caption="AI Space Shooter")
+        pyxel.init(256, 120, fps=FPS, caption=GAME_TITLE)
         pyxel.load("tmp.pyxres")
         # game init
         global PLAYER
@@ -375,10 +389,11 @@ class App:
             bullet.update()
         for enemy in ENEMIES:
             enemy.update()
-        ai.PLAYER_POSITION = []
-        ai.PLAYER_POSITION.append(PLAYER.x)
-        ai.PLAYER_POSITION.append(PLAYER.y)
-        ai.take_action()
+        if AI_MODE_ENABLED:
+            ai.PLAYER_POSITION = []
+            ai.PLAYER_POSITION.append(PLAYER.x)
+            ai.PLAYER_POSITION.append(PLAYER.y)
+            ai.take_action()
 
     def draw_main(self):
         pyxel.cls(0)
@@ -404,10 +419,13 @@ class App:
 
         if pyxel.btnp(pyxel.KEY_ENTER):
 
+            global AI_MODE_ENABLED
             if self.game_mode == 1:
                 ai.on = False
+                AI_MODE_ENABLED = False
             else:
                 ai.on = True
+                AI_MODE_ENABLED = True
 
             global CURRENT_SCREEN
             CURRENT_SCREEN = "main"
@@ -415,7 +433,7 @@ class App:
     def draw_title(self):
         pyxel.cls(0)
         self.background.draw()
-        draw_text_centered("AI SPACE SHOOTER", pyxel.height*0.25)
+        draw_text_centered(GAME_TITLE.upper(), pyxel.height*0.25)
         if self.game_mode == 1:
             offset = 0.7
         else:
@@ -437,17 +455,18 @@ class App:
             BULLETS = []
             global CURRENT_SCREEN
             CURRENT_SCREEN = 'main'
-            ai.enemy_positions = []
-            ai.bullets = []
-            ai.PLAYER_POSITION = []
-            ai.PLAYER_POSITION.append(PLAYER.x)
-            ai.PLAYER_POSITION.append(PLAYER.y)
-                        
-            ai.up = False
-            ai.down = False
-            ai.shoot = False
-            
-            ai.enemies_in_range = 0
+            if AI_MODE_ENABLED:
+                ai.enemy_positions = []
+                ai.bullets = []
+                ai.PLAYER_POSITION = []
+                ai.PLAYER_POSITION.append(PLAYER.x)
+                ai.PLAYER_POSITION.append(PLAYER.y)
+                            
+                ai.up = False
+                ai.down = False
+                ai.shoot = False
+                
+                ai.enemies_in_range = 0
 
     def draw_game_over(self):
         pyxel.cls(0)
