@@ -20,7 +20,7 @@ python main.py
 
 To run the game with the AI
 ```bash
-IDK AI team hasn't told me yet
+python main_ai.py
 ```
 
 ### Playing the game
