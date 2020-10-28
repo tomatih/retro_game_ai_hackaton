@@ -13,16 +13,11 @@ pip -r requirements.txt
 ```
 
 ### Running the game
-To run the game in human playable format run:
+to turn the game on
 ```bash
-python main.py
+python space_shooter.py
 ```
-
-To run the game with the AI
-```bash
-python main_ai.py
-```
-then just press enter to start the game with the AI
+and then choose either Human or AI play mode in the menu
 
 ### Playing the game
 You controll the player with the up and down arrows and shoot using the spacebar
