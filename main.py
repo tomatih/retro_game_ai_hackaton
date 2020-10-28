@@ -15,6 +15,7 @@ SCORE = 0
 PLAYER = None
 FPS = 60
 CURRENT_SCREEN = "title"
+GAME_TITLE = "AI Space Shooter"
 
 
 def draw_text_centered(text, y, col=7):
@@ -277,7 +278,7 @@ class Spawner:
 class App:
     def __init__(self):
         # pyxel init
-        pyxel.init(256, 120, fps=FPS, caption="AI shooter")
+        pyxel.init(256, 120, fps=FPS, caption=GAME_TITLE)
         pyxel.load("tmp.pyxres")
         # game init
         global PLAYER
@@ -342,7 +343,7 @@ class App:
     def draw_title(self):
         pyxel.cls(0)
         self.background.draw()
-        draw_text_centered("HELLO WORLD", pyxel.height*0.25)
+        draw_text_centered(GAME_TITLE.upper(), pyxel.height*0.25)
         draw_text_centered("- PRESS ENTER -", pyxel.height*0.75)
 
     def update_game_over(self):
